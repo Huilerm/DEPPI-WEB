@@ -18,7 +18,7 @@ import {
 import { Icone } from "../../../components/ui/Icone";
 import "./inicio-admin.css";
 
-const INSCRICOES: Record<
+export const INSCRICOES: Record<
   StatusInscricao,
   { rotulo: string; icone: string; cor: string }
 > = {
@@ -28,7 +28,7 @@ const INSCRICOES: Record<
   CANCELADO: { rotulo: "Cancelada", icone: "block", cor: "#737373" },
 };
 
-const CURSOS: Record<
+export const CURSOS: Record<
   StatusCurso,
   { rotulo: string; icone: string; cor: string }
 > = {
@@ -38,35 +38,35 @@ const CURSOS: Record<
   FECHADO: { rotulo: "Fechado", icone: "lock", cor: "#6b6b6b" },
 };
 
-const ROSCA_CORES: Record<StatusCurso, string> = {
+export const ROSCA_CORES: Record<StatusCurso, string> = {
   ANALISE: "#b45309",
   ANDAMENTO: "#15803d",
   CONCLUIDO: "#1d4ed8",
   FECHADO: "#9ca3af",
 };
 
-const ORDEM_INSCRICAO: StatusInscricao[] = [
+export const ORDEM_INSCRICAO: StatusInscricao[] = [
   "PENDENTE",
   "DEFERIDO",
   "INDEFERIDO",
   "CANCELADO",
 ];
 
-const ORDEM_CURSO: StatusCurso[] = [
+export const ORDEM_CURSO: StatusCurso[] = [
   "ANALISE",
   "ANDAMENTO",
   "CONCLUIDO",
   "FECHADO",
 ];
 
-function quantidade<S extends string>(
+export function quantidade<S extends string>(
   lista: { status: S; quantidade: number }[],
   status: S,
 ) {
   return lista.find((i) => i.status === status)?.quantidade ?? 0;
 }
 
-function Rosca({
+export function Rosca({
   fatias,
   centro,
 }: {

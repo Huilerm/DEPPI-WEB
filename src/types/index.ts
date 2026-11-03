@@ -61,3 +61,18 @@ export interface ResumoSistema {
   inscricoesPorSituacao: ContagemPorStatus<StatusInscricao>[];
   cursosPorSituacao: ContagemPorStatus<StatusCurso>[];
 }
+
+export interface UsuarioLista { //Tipos adicionados para a listagem de usuários no painel de administração
+  id: string;
+  nome: string;
+  emailInstitucional: string;
+  criadoEm: string;
+  cargos: { cargo: Cargo }[];
+}
+
+export interface CursoRelatorio {
+  id: string;
+  nome: string;
+  status: StatusCurso;
+  _count: { inscricao: number };
+}

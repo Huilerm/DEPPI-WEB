@@ -16,6 +16,7 @@ export interface Instituicao {
   nome: string;
   cidade: string;
   campus: string;
+  cnpj: string;
 }
 
 export interface Curso {

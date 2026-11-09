@@ -16,9 +16,9 @@ const ITENS = {
 } satisfies Record<string, ItemMenu>;
 
 const MENU: Record<Cargo, (keyof typeof ITENS)[]> = {
-  ALUNO: ["inicio"],
-  PROFESSOR: ["inicio"],
-  DEPPI: ["inicio"],
+  ALUNO: ["inicio", "perfil"],
+  PROFESSOR: ["inicio", "perfil"],
+  DEPPI: ["inicio", "perfil"],
   ADMIN: ["inicio", "cursos", "instituicoes", "usuarios", "relatorios", "perfil"],
 };
 

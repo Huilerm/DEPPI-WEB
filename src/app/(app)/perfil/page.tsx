@@ -1,26 +1,87 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useSessao } from "../../../components/layout/SessaoContext";
 import { Avatar } from "../../../components/ui/Avatar";
 import { Icone } from "../../../components/ui/Icone";
-import { papelPrincipal } from "../../../lib/sessao";
+import { API_URL } from "../../../lib/api";
+import { lerToken } from "../../../lib/sessao";
 import "./perfil.css";
+
+type PerfilApi = {
+  nome?: string;
+  nomeSocial?: string | null;
+  emailInstitucional?: string;
+  criadoEm?: string;
+  professor?: { siape?: string } | null;
+  cargos?: Array<{ cargo?: string } | string>;
+};
+
+function mensagemDaResposta(dados: unknown, fallback: string): string {
+  if (dados && typeof dados === "object") {
+    const objeto = dados as Record<string, unknown>;
+    if (typeof objeto.mensagem === "string") return objeto.mensagem;
+    if (typeof objeto.msg === "string") return objeto.msg;
+  }
+  return fallback;
+}
 
 export default function PerfilPage() {
   const { usuario, papel } = useSessao();
   const [nome, setNome] = useState(usuario.nome ?? "");
-  const [nomeSocial, setNomeSocial] = useState(
-    (usuario as typeof usuario & { nomeSocial?: string }).nomeSocial ?? "",
-  );
+  const [nomeSocial, setNomeSocial] = useState("");
+  const [siape, setSiape] = useState("");
+  const [criadoEm, setCriadoEm] = useState("");
+  const [cargos, setCargos] = useState<string[]>(usuario.cargos ?? []);
   const [senha, setSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [mostrarConfirmacao, setMostrarConfirmacao] = useState(false);
   const [mensagem, setMensagem] = useState("");
   const [erro, setErro] = useState("");
+  const [carregandoPerfil, setCarregandoPerfil] = useState(true);
+  const [salvando, setSalvando] = useState(false);
 
-  function salvar(evento: FormEvent<HTMLFormElement>) {
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregarPerfil() {
+      try {
+        const token = lerToken();
+        if (!token) throw new Error("Sua sessão expirou. Entre novamente.");
+
+        const resposta = await fetch(`${API_URL}/users/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+          cache: "no-store",
+        });
+        const dados = await resposta.json().catch(() => null);
+        if (!resposta.ok) {
+          throw new Error(mensagemDaResposta(dados, `Não foi possível carregar o perfil (${resposta.status}).`));
+        }
+
+        const perfil = dados as PerfilApi;
+        if (!ativo) return;
+        if (perfil.nome) setNome(perfil.nome);
+        setNomeSocial(perfil.nomeSocial ?? "");
+        setSiape(perfil.professor?.siape ?? "");
+        setCriadoEm(perfil.criadoEm ?? "");
+        if (perfil.cargos?.length) {
+          setCargos(perfil.cargos.map((cargo) =>
+            typeof cargo === "string" ? cargo : cargo.cargo ?? ""
+          ).filter(Boolean));
+        }
+      } catch (e) {
+        if (ativo) setErro(e instanceof Error ? e.message : "Erro ao carregar perfil.");
+      } finally {
+        if (ativo) setCarregandoPerfil(false);
+      }
+    }
+
+    carregarPerfil();
+    return () => { ativo = false; };
+  }, []);
+
+  async function salvar(evento: FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     setMensagem("");
     setErro("");
@@ -38,20 +99,51 @@ export default function PerfilPage() {
       return;
     }
 
-    // O endpoint de atualização de perfil ainda precisa ser confirmado no backend.
-    // Não simulamos uma gravação remota: os dados continuam na sessão atual.
-    setMensagem(
-      "Formulário validado. Para salvar no sistema, ainda precisamos conectar o endpoint de atualização de perfil da API.",
-    );
+    const corpo: { nome: string; nomeSocial: string; senha?: string } = {
+      nome: nome.trim(),
+      nomeSocial: nomeSocial.trim(),
+    };
+    if (senha) corpo.senha = senha;
+
+    setSalvando(true);
+    try {
+      const token = lerToken();
+      if (!token) throw new Error("Sua sessão expirou. Entre novamente.");
+
+      // Rota confirmada no backend: PATCH /users/atualizar.
+      const resposta = await fetch(`${API_URL}/users/atualizar`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(corpo),
+      });
+      const dados = await resposta.json().catch(() => null);
+      if (!resposta.ok) {
+        throw new Error(mensagemDaResposta(dados, `Não foi possível salvar as alterações (${resposta.status}).`));
+      }
+
+      const usuarioAtualizado = (dados as { usuario?: { nome?: string } } | null)?.usuario;
+      const usuarioSessao = JSON.parse(sessionStorage.getItem("usuario") ?? "{}");
+      sessionStorage.setItem("usuario", JSON.stringify({
+        ...usuarioSessao,
+        nome: usuarioAtualizado?.nome ?? corpo.nome,
+      }));
+
+      setNome(usuarioAtualizado?.nome ?? corpo.nome);
+      setNomeSocial(corpo.nomeSocial);
+      setSenha("");
+      setConfirmarSenha("");
+      setMensagem(mensagemDaResposta(dados, "Perfil atualizado com sucesso."));
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : "Erro ao salvar as alterações.");
+    } finally {
+      setSalvando(false);
+    }
   }
 
-  const usuarioComDados = usuario as typeof usuario & {
-    siape?: string;
-    criadoEm?: string;
-    dataCriacao?: string;
-    nomeSocial?: string;
-  };
-  const criadoEm = usuarioComDados.criadoEm ?? usuarioComDados.dataCriacao;
+  const iniciaisNome = nome.trim() || usuario.nome;
 
   return (
     <main className="pagina perfil-pagina">
@@ -65,7 +157,7 @@ export default function PerfilPage() {
       <div className="perfil-grade">
         <section className="perfil-cartao perfil-resumo" aria-label="Resumo do perfil">
           <div className="perfil-identidade">
-            <Avatar nome={nome || usuario.nome} tamanho={56} />
+            <Avatar nome={iniciaisNome} tamanho={56} />
             <div className="perfil-identidade__texto">
               <h2>{nome || usuario.nome}</h2>
               <p>{usuario.email}</p>
@@ -77,25 +169,24 @@ export default function PerfilPage() {
           <dl className="perfil-detalhes">
             <div>
               <dt>SIAPE</dt>
-              <dd>{usuarioComDados.siape || "Não informado"}</dd>
+              <dd>{siape || "Não informado"}</dd>
             </div>
             <div>
               <dt>Cargos</dt>
               <dd className="perfil-cargos">
-                {usuario.cargos?.length
-                  ? usuario.cargos.map((cargo) => <span key={cargo}>{cargo}</span>)
+                {cargos.length
+                  ? cargos.map((cargo) => <span key={cargo}>{cargo}</span>)
                   : <span>{papel}</span>}
               </dd>
             </div>
             <div>
               <dt>Conta criada em</dt>
               <dd>
-                {criadoEm
-                  ? new Date(criadoEm).toLocaleDateString("pt-BR")
-                  : "Não informado"}
+                {criadoEm ? new Date(criadoEm).toLocaleDateString("pt-BR") : "Não informado"}
               </dd>
             </div>
           </dl>
+          {carregandoPerfil && <p className="perfil-ajuda">Carregando informações do perfil...</p>}
         </section>
 
         <section className="perfil-cartao perfil-edicao">
@@ -176,9 +267,9 @@ export default function PerfilPage() {
             {mensagem && <p className="perfil-alerta perfil-alerta--info" role="status">{mensagem}</p>}
 
             <div className="perfil-acoes">
-              <button type="submit" className="perfil-botao">
+              <button type="submit" className="perfil-botao" disabled={salvando}>
                 <Icone nome="check" tamanho={18} />
-                Salvar alterações
+                {salvando ? "Salvando..." : "Salvar alterações"}
               </button>
             </div>
           </form>

@@ -6,10 +6,10 @@ Frontend do **DEPPI — sistema de gerenciamento de cursos, inscrições e usuá
 
 ## Tecnologias
 
-- [Next.js](https://nextjs.org/) 16
+- [Next.js](https://nextjs.org/)
 - [React](https://react.dev/)
 - [TypeScript](https://www.typescriptlang.org/)
-- [Tailwind CSS](https://tailwindcss.com/) 4
+- [Tailwind CSS](https://tailwindcss.com/)
 
 ## Pré-requisitos
 

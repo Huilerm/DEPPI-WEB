@@ -6,7 +6,6 @@ import { buscarUsuarios, concederCargo } from "../../lib/api";
 import { formatarNumero } from "../../lib/formatadores";
 import { Avatar } from "../../components/ui/Avatar";
 import { Icone } from "../../components/ui/Icone";
-import "./usuarios.css";
 
 const POR_PAGINA = 8;
 const CARGOS: Cargo[] = ["ALUNO", "PROFESSOR", "DEPPI", "ADMIN"];
@@ -85,18 +84,18 @@ export function UsuariosPage() {
   }
 
   return (
-    <div className="pagina">
-      <h1 className="usr__titulo">Usuários</h1>
-      <p className="usr__sub">
+    <div className="flex flex-col gap-6 px-8 py-7">
+      <h1 className="m-0 font-titulo text-[28px]">Usuários</h1>
+      <p className="m-0 text-sm text-texto-3">
         {formatarNumero(usuarios.length)}{" "}
         {usuarios.length === 1 ? "usuário" : "usuários"}
       </p>
 
-      <div className="usr__filtros">
-        <div className="usr__busca-container">
-          <Icone nome="search" tamanho={18} />
+      <div className="m-0 flex gap-3">
+        <div className="relative flex flex-1 items-center">
+          <Icone nome="search" tamanho={18} className="pointer-events-none absolute left-3 text-[#888]" />
           <input
-            className="usr__busca"
+            className="h-10 w-full min-w-0 flex-1 rounded-[10px] border border-borda bg-cartao pl-[38px] pr-3 text-texto"
             placeholder="Buscar por nome ou e-mail"
             value={busca}
             onChange={(e) => {
@@ -106,7 +105,7 @@ export function UsuariosPage() {
           />
         </div>
         <select
-          className="usr__select"
+          className="h-10 w-[140px] flex-shrink-0 rounded-[10px] border border-borda bg-cartao px-3 text-texto seta-select"
           value={filtro}
           onChange={(e) => {
             setFiltro(e.target.value as Cargo | "");
@@ -122,15 +121,15 @@ export function UsuariosPage() {
         </select>
       </div>
 
-      {carregando && <p className="usr__vazio">Carregando usuários…</p>}
+      {carregando && <p className="p-6 text-center text-texto-3">Carregando usuários…</p>}
       {erro && (
-        <p className="usr__vazio" role="alert">
+        <p className="p-6 text-center text-texto-3" role="alert">
           Não foi possível carregar os usuários: {erro}
         </p>
       )}
 
       {!carregando && !erro && (
-        <div className="usr__tabela">
+        <div className="overflow-x-auto rounded-xl border border-borda bg-cartao [&_table]:w-full [&_table]:border-collapse [&_table]:text-sm [&_th]:bg-sidebar [&_th]:px-[18px] [&_th]:py-3 [&_th]:text-left [&_th]:font-medium [&_th]:text-texto-3 [&_td]:border-t [&_td]:border-borda [&_td]:px-[18px] [&_td]:py-2.5">
           <table>
             <thead>
               <tr>
@@ -147,29 +146,29 @@ export function UsuariosPage() {
                 return (
                   <tr key={u.id}>
                     <td>
-                      <span className="usr__nome">
+                      <span className="flex items-center gap-3 font-medium">
                         <Avatar nome={u.nome} tamanho={28} />
                         {u.nome}
                       </span>
                     </td>
-                    <td className="usr__mono">{u.emailInstitucional}</td>
+                    <td className="font-mono text-[13px]">{u.emailInstitucional}</td>
                     <td>
                       {cargos.map((c) => (
                         <span
                           key={c}
-                          className={`usr__tag${c === "ADMIN" || c === "DEPPI" ? " usr__tag--dest" : ""}`}
+                          className={`mr-1.5 inline-block rounded px-2 py-0.5 font-mono text-[11px] ${c === "ADMIN" || c === "DEPPI" ? "bg-[#fdeee6] text-acento" : "bg-trilho"}`}
                         >
                           {c}
                         </span>
                       ))}
                     </td>
-                    <td className="usr__mono">
+                    <td className="font-mono text-[13px]">
                       {new Date(u.criadoEm).toLocaleDateString("pt-BR")}
                     </td>
-                    <td className="usr__acao">
+                    <td className="text-right">
                       {!cargos.includes("ADMIN") && (
                         <button
-                          className="botao-secundario"
+                          className="inline-flex h-12 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[10px] border border-borda bg-cartao px-[18px] text-[13px] font-medium text-texto transition-colors hover:bg-sidebar"
                           onClick={() => abrir(u)}
                         >
                           <Icone nome="shield_person" tamanho={18} />
@@ -182,18 +181,18 @@ export function UsuariosPage() {
               })}
               {visiveis.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="usr__vazio">
+                  <td colSpan={5} className="p-6 text-center text-texto-3">
                     Nenhum usuário encontrado.
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
-          <div className="usr__rodape">
+          <div className="flex items-center justify-between border-t border-borda bg-sidebar px-[18px] py-3 text-[13px] text-texto-3">
             <span>
               Mostrando {visiveis.length} de {formatarNumero(filtrados.length)}
             </span>
-            <span className="usr__pag">
+            <span className="flex items-center gap-2.5 font-mono [&_button]:size-7 [&_button]:cursor-pointer [&_button]:rounded-md [&_button]:border [&_button]:border-borda [&_button]:bg-cartao [&_button]:text-texto [&_button:disabled]:cursor-default [&_button:disabled]:opacity-40">
               <button
                 disabled={paginaAtual <= 1}
                 onClick={() => setPagina(paginaAtual - 1)}
@@ -215,10 +214,10 @@ export function UsuariosPage() {
       )}
 
       {alvo && (
-        <div className="usr__fundo" onClick={() => !salvando && setAlvo(null)}>
-          <div className="usr__modal" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45" onClick={() => !salvando && setAlvo(null)}>
+          <div className="w-[min(480px,92vw)] rounded-[14px] bg-cartao p-[22px] [&_h2]:m-0 [&_h2]:font-titulo [&_h2]:text-xl" onClick={(e) => e.stopPropagation()}>
             <h2>Conceder cargo</h2>
-            <p className="usr__sub">
+            <p className="m-0 text-sm text-texto-3">
               Escolha o cargo para <strong>{alvo.nome}</strong>. Os cargos
               atuais são mantidos.
             </p>
@@ -228,7 +227,7 @@ export function UsuariosPage() {
               return (
                 <label
                   key={c}
-                  className={`usr__opcao${escolha === c ? " usr__opcao--sel" : ""}${jaTem ? " usr__opcao--off" : ""}`}
+                  className={`mb-2.5 flex items-start gap-3 rounded-[10px] border px-3.5 py-3 [&_small]:text-texto-3 ${escolha === c ? "border-acento bg-[#fff3ec]" : "border-borda"} ${jaTem ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
                 >
                   <input
                     type="radio"
@@ -247,26 +246,26 @@ export function UsuariosPage() {
               );
             })}
 
-            <p className="usr__aviso">
+            <p className="flex items-center gap-2 rounded-lg border border-[#fed7aa] bg-[#fff3e6] px-3 py-2.5 text-[13px] text-[#9a3412]">
               <Icone nome="warning" tamanho={16} /> Esta ação não pode ser
               desfeita pela interface.
             </p>
             {erroModal && (
-              <p className="usr__erro" role="alert">
+              <p className="text-[13px] text-[#c0392b]" role="alert">
                 {erroModal}
               </p>
             )}
 
-            <div className="usr__botoes">
+            <div className="mt-4 flex justify-end gap-2.5">
               <button
-                className="botao-secundario usr__cancelar"
+                className="h-[38px] cursor-pointer rounded-lg border border-borda bg-cartao px-4 font-medium text-texto transition-colors hover:bg-sidebar disabled:cursor-default disabled:opacity-50"
                 disabled={salvando}
                 onClick={() => setAlvo(null)}
               >
                 Cancelar
               </button>
               <button
-                className="usr__confirmar"
+                className="h-[38px] cursor-pointer rounded-lg border-0 bg-acento px-4 font-semibold text-white disabled:cursor-default disabled:opacity-50"
                 disabled={
                   salvando || alvo.cargos.some((x) => x.cargo === escolha)
                 }

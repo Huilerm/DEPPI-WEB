@@ -18,8 +18,9 @@ import {
     Rosca,
     quantidade,
 } from "../inicio/admin/page";
-import "../inicio/admin/inicio-admin.css";
-import "./relatorios.css";
+
+const ICONE_STATUS =
+    "flex size-[18px] flex-none items-center justify-center";
 
 export function RelatoriosPage() {
     const [resumo, setResumo] = useState<ResumoSistema | null>(null);
@@ -79,47 +80,47 @@ export function RelatoriosPage() {
     );
 
     return (
-        <div className="pagina">
-            <div className="saudacao">
+        <div className="flex flex-col gap-6 px-8 py-7">
+            <div className="flex items-start justify-between gap-4">
                 <div>
-                    <h1 className="saudacao__titulo">Relatórios</h1>
-                    <p className="saudacao__data">
+                    <h1 className="font-titulo text-[28px] font-bold leading-[1.2] tracking-[-0.01em]">Relatórios</h1>
+                    <p className="mt-1 text-texto-2">
                         {resumo
                             ? `Gerado em ${new Date(resumo.geradoEm).toLocaleString("pt-BR")}`
                             : "—"}
                     </p>
                 </div>
-                <div className="rel__acoes">
+                <div className="flex gap-2.5">
                     <button
-                        className="botao-secundario"
+                        className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-borda bg-cartao px-4 text-sm font-medium text-texto hover:bg-trilho"
                         onClick={carregar}
                         disabled={carregando}
                         aria-label="Atualizar"
                     >
                         <Icone nome="refresh" tamanho={18} />
                     </button>
-                    <button className="rel__csv" onClick={baixar} disabled={exportando}>
+                    <button className="flex h-10 cursor-pointer items-center gap-1.5 rounded-lg border-0 bg-acento px-4 font-semibold text-white disabled:opacity-60" onClick={baixar} disabled={exportando}>
                         <Icone nome="download" tamanho={18} />
                         {exportando ? "Exportando…" : "Exportar CSV"}
                     </button>
                 </div>
             </div>
 
-            {carregando && <p className="aviso-exemplo">Carregando relatórios…</p>}
+            {carregando && <p className="text-xs text-texto-3">Carregando relatórios…</p>}
             {erro && (
-                <p className="aviso-exemplo" role="alert">
+                <p className="text-xs text-texto-3" role="alert">
                     Erro: {erro}
                 </p>
             )}
 
             {resumo && (
                 <>
-                    <section className="resumo">
+                    <section className="grid grid-cols-[repeat(auto-fit,minmax(130px,1fr))] gap-px overflow-hidden rounded-[10px] border border-borda bg-borda">
                         {cards.map(([rotulo, valor]) => (
-                            <div key={rotulo} className="resumo__item">
-                                <span className="resumo__rotulo">{rotulo}</span>
+                            <div key={rotulo} className="flex flex-col gap-0.5 bg-cartao px-[18px] pb-4 pt-3.5">
+                                <span className="text-xs text-texto-2">{rotulo}</span>
                                 <span
-                                    className={`resumo__valor${rotulo === "Vagas restantes" ? " resumo__valor--destaque" : ""}`}
+                                    className={`font-titulo text-[28px] font-bold leading-[1.2] tracking-[-0.02em]${rotulo === "Vagas restantes" ? " text-acento" : ""}`}
                                 >
                                     {formatarNumero(valor ?? 0)}
                                 </span>
@@ -127,45 +128,48 @@ export function RelatoriosPage() {
                         ))}
                     </section>
 
-                    <div className="graficos">
-                        <section className="cartao">
-                            <div className="cartao__cabecalho">
-                                <h2 className="cartao__titulo">Inscrições por situação</h2>
+                    <div className="grid grid-cols-1 gap-4 min-[961px]:grid-cols-[1.3fr_1fr]">
+                        <section className="rounded-xl border border-borda bg-cartao px-6 py-[22px]">
+                            <div className="mb-5 flex items-center justify-between">
+                                <h2 className="font-titulo text-base font-semibold">Inscrições por situação</h2>
                             </div>
-                            <div className="barras">
+                            <div className="flex flex-col gap-3.5">
                                 {ORDEM_INSCRICAO.map((s) => {
                                     const q = quantidade(resumo.inscricoesPorSituacao, s);
                                     const info = INSCRICOES[s];
                                     return (
-                                        <div key={s} className="barra">
+                                        <div key={s} className="grid grid-cols-[110px_1fr_56px] items-center gap-4">
                                             <span
-                                                className="barra__rotulo"
+                                                className="flex items-center gap-2"
                                                 style={{ color: info.cor }}
                                             >
-                                                <Icone nome={info.icone} />
+                                                <span className={ICONE_STATUS}>
+                                                    <Icone nome={info.icone} tamanho={18} />
+                                                </span>
+
                                                 {info.rotulo}
                                             </span>
-                                            <div className="barra__trilho">
+                                            <div className="h-6 overflow-hidden rounded-[5px] bg-trilho">
                                                 <div
-                                                    className="barra__preenchimento"
+                                                    className="h-full rounded-[5px]"
                                                     style={{
                                                         width: `${(q / maior) * 100}%`,
                                                         background: info.cor,
                                                     }}
                                                 />
                                             </div>
-                                            <span className="numero">{formatarNumero(q)}</span>
+                                            <span className="text-right font-mono text-[13px] font-medium">{formatarNumero(q)}</span>
                                         </div>
                                     );
                                 })}
                             </div>
                         </section>
 
-                        <section className="cartao">
-                            <div className="cartao__cabecalho">
-                                <h2 className="cartao__titulo">Cursos por situação</h2>
+                        <section className="rounded-xl border border-borda bg-cartao px-6 py-[22px]">
+                            <div className="mb-5 flex items-center justify-between">
+                                <h2 className="font-titulo text-base font-semibold">Cursos por situação</h2>
                             </div>
-                            <div className="rosca-bloco">
+                            <div className="flex flex-wrap items-center gap-8">
                                 <Rosca
                                     centro={resumo.totais.cursos}
                                     fatias={ORDEM_CURSO.map((s) => ({
@@ -173,20 +177,22 @@ export function RelatoriosPage() {
                                         valor: quantidade(resumo.cursosPorSituacao, s),
                                     }))}
                                 />
-                                <div className="legenda">
+                                <div className="flex min-w-[150px] flex-1 flex-col gap-3.5">
                                     {ORDEM_CURSO.map((s) => {
                                         const info = CURSOS[s];
                                         return (
                                             <div
                                                 key={s}
-                                                className="legenda__linha"
+                                                className="flex items-center gap-2"
                                                 style={{ color: info.cor }}
                                             >
-                                                <Icone nome={info.icone} />
-                                                <span className="legenda__rotulo">{info.rotulo}</span>
+                                                <span className={ICONE_STATUS}>
+                                                    <Icone nome={info.icone} tamanho={18} />
+                                                </span>
+
+                                                <span>{info.rotulo}</span>
                                                 <span
-                                                    className="numero"
-                                                    style={{ color: "var(--texto)" }}
+                                                    className="text-right font-mono text-[13px] font-medium text-texto"
                                                 >
                                                     {formatarNumero(
                                                         quantidade(resumo.cursosPorSituacao, s),
@@ -200,13 +206,13 @@ export function RelatoriosPage() {
                         </section>
                     </div>
 
-                    <div className="rel__tabela">
+                    <div className="overflow-x-auto rounded-xl border border-borda bg-cartao [&_table]:w-full [&_table]:border-collapse [&_table]:text-sm [&_th]:px-[18px] [&_th]:py-3 [&_th]:text-left [&_th]:font-medium [&_th]:text-texto-3 [&_td]:border-t [&_td]:border-borda [&_td]:px-[18px] [&_td]:py-3">
                         <table>
                             <thead>
                                 <tr>
                                     <th>Curso</th>
                                     <th>Status</th>
-                                    <th className="rel__dir">Inscritos ↓</th>
+                                    <th className="text-right!">Inscritos ↓</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -214,17 +220,22 @@ export function RelatoriosPage() {
                                     <tr key={c.id}>
                                         <td>{c.nome}</td>
                                         <td style={{ color: CURSOS[c.status].cor }}>
-                                            <Icone nome={CURSOS[c.status].icone} />{" "}
-                                            {CURSOS[c.status].rotulo}
+                                            <span className="inline-flex items-center gap-2">
+                                                <span className={ICONE_STATUS}>
+                                                    <Icone nome={CURSOS[c.status].icone} tamanho={18} />
+                                                </span>
+
+                                                {CURSOS[c.status].rotulo}
+                                            </span>
                                         </td>
-                                        <td className="rel__dir numero">
+                                        <td className="text-right! font-mono text-[13px] font-medium">
                                             {formatarNumero(c._count.inscricao)}
                                         </td>
                                     </tr>
                                 ))}
                                 {cursos.length === 0 && (
                                     <tr>
-                                        <td colSpan={3} className="rel__vazio">
+                                        <td colSpan={3} className="text-center text-texto-3">
                                             Nenhum curso cadastrado.
                                         </td>
                                     </tr>

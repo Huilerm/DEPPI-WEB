@@ -1,9 +1,14 @@
 // Estrutura geral
 
-import "./globals.css"; // Carrega o css
+import "./globals.css";
+import { Space_Grotesk, Inter_Tight, JetBrains_Mono } from "next/font/google";
 
-export default function RootLayout({ // Define o layout principal
-  children, // Recebe o conteúdo das páginas
+const fonteTitulo = Space_Grotesk({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--fonte-titulo" });
+const fonteCorpo = Inter_Tight({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--fonte-corpo" });
+const fonteMono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500"], variable: "--fonte-mono" });
+
+export default function RootLayout({
+  children,
 }: {
   children: React.ReactNode;
 }) {
@@ -15,7 +20,9 @@ export default function RootLayout({ // Define o layout principal
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..24,400,0,0"
         />
       </head>
-      <body>{children}</body>
+      <body className={`${fonteTitulo.variable} ${fonteCorpo.variable} ${fonteMono.variable} font-corpo`}>
+        {children}
+      </body>
     </html>
   );
 }

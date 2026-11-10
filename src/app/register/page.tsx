@@ -2,7 +2,17 @@
 
 import { useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import styles from "./register.module.css";
+
+const INPUT_BASE =
+  "box-border h-[42px] w-full appearance-none rounded-lg border bg-[#faf9f7] px-3 font-corpo text-sm text-[#1a1a1a] outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-[#6b6b6b]";
+const INPUT_OK =
+  "border-[#e4e1db] focus:border-[#d97706] focus:shadow-[0_0_0_3px_rgba(217,119,6,0.2)]";
+const INPUT_INVALIDO =
+  "border-[#b91c1c] focus:border-[#b91c1c] focus:shadow-[0_0_0_3px_rgba(185,28,28,0.15)]";
+const DATA =
+  "[&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:top-0 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:w-11 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-datetime-edit]:p-0";
+const BTN =
+  "inline-flex h-[42px] cursor-pointer items-center gap-1.5 rounded-lg font-corpo text-sm transition-[background,border-color] duration-150 focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[rgba(217,119,6,0.4)]";
 
 const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "https://deppiapi-q96m.onrender.com").replace(/\/$/, "");
 
@@ -134,7 +144,7 @@ const ICON_PATHS: Record<IconName, ReactNode> = {
 function Icon({ name, size = 18, className = "" }: { name: IconName; size?: number; className?: string }) {
   return (
     <svg
-      className={`${styles.icon} ${className}`}
+      className={`inline-block flex-none ${className}`}
       width={size}
       height={size}
       viewBox="0 0 24 24"
@@ -178,11 +188,11 @@ function TextField({
     onChange(name, mask ? mask(ev.target.value) : ev.target.value);
 
   return (
-    <div className={`${styles.field} ${full ? styles.full : ""}`}>
-      <label className={styles.label} htmlFor={name}>
-        {label} {optional && <span className={styles.optional}>(opcional)</span>}
+    <div className={`flex min-w-0 flex-col gap-1.5 ${full ? "col-span-full" : ""}`}>
+      <label className="text-[13px] font-medium text-[#333]" htmlFor={name}>
+        {label} {optional && <span className="font-normal text-[#6b6b6b]">(opcional)</span>}
       </label>
-      <div className={styles.control}>
+      <div className="relative flex items-center">
         <input
           id={name}
           name={name}
@@ -195,25 +205,25 @@ function TextField({
           aria-invalid={!!error}
           aria-describedby={error ? `${name}-erro` : undefined}
           className={[
-            styles.input,
-            mono || isDate ? styles.mono : "",
-            isDate ? styles.date : "",
-            isDate || error ? styles.hasIcon : "",
-            error ? styles.invalid : "",
+            INPUT_BASE,
+            error ? INPUT_INVALIDO : INPUT_OK,
+            mono || isDate ? "font-mono text-[13px]" : "",
+            isDate ? DATA : "",
+            isDate || error ? "pr-[38px]" : "",
           ].join(" ")}
         />
         {isDate ? (
-          <Icon name="calendar" className={styles.trailing} />
+          <Icon name="calendar" className="pointer-events-none absolute right-3 text-[#6b6b6b]" />
         ) : (
           error && (
-            <Icon name="error" className={`${styles.trailing} ${styles.trailingError}`} />
+            <Icon name="error" className="pointer-events-none absolute right-3 text-[#b91c1c]" />
           )
         )}
       </div>
       {error ? (
-        <span id={`${name}-erro`} className={styles.errorText}>{error}</span>
+        <span id={`${name}-erro`} className="text-xs text-[#b91c1c]">{error}</span>
       ) : (
-        hint && <span className={styles.hint}>{hint}</span>
+        hint && <span className="text-xs text-[#6b6b6b]">{hint}</span>
       )}
     </div>
   );
@@ -224,9 +234,9 @@ function SelectField({
 }: FieldProps & { options: [string, string][]; placeholder?: string }) {
   const error = errors[name];
   return (
-    <div className={`${styles.field} ${full ? styles.full : ""}`}>
-      <label className={styles.label} htmlFor={name}>{label}</label>
-      <div className={styles.control}>
+    <div className={`flex min-w-0 flex-col gap-1.5 ${full ? "col-span-full" : ""}`}>
+      <label className="text-[13px] font-medium text-[#333]" htmlFor={name}>{label}</label>
+      <div className="relative flex items-center">
         <select
           id={name}
           name={name}
@@ -234,7 +244,7 @@ function SelectField({
           onChange={(ev) => onChange(name, ev.target.value)}
           aria-invalid={!!error}
           aria-describedby={error ? `${name}-erro` : undefined}
-          className={`${styles.input} ${styles.hasIcon} ${error ? styles.invalid : ""}`}
+          className={`${INPUT_BASE} pr-[38px] ${error ? INPUT_INVALIDO : INPUT_OK}`}
           style={{ color: values[name] ? undefined : "#6b6b6b" }}
         >
           <option value="">{placeholder}</option>
@@ -242,9 +252,9 @@ function SelectField({
             <option key={value} value={value}>{text}</option>
           ))}
         </select>
-        <Icon name="chevron" size={20} className={styles.trailing} />
+        <Icon name="chevron" size={20} className="pointer-events-none absolute right-3 text-[#6b6b6b]" />
       </div>
-      {error && <span id={`${name}-erro`} className={styles.errorText}>{error}</span>}
+      {error && <span id={`${name}-erro`} className="text-xs text-[#b91c1c]">{error}</span>}
     </div>
   );
 }
@@ -399,98 +409,93 @@ export default function Cadastro() {
   }
 
   return (
-    <main className={styles.page}>
-      <link
-        rel="stylesheet"
-        precedence="default"
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
-      />
-      <div className={styles.column}>
-        <div className={styles.topbar}>
-          <div className={styles.brand}>
-            <div className={styles.logo} aria-hidden>D</div>
-            <h1 className={styles.brandName}>DEPPI</h1>
+    <main className="flex min-h-screen flex-col items-center bg-[#faf9f7] px-4 py-10 font-corpo text-[#1a1a1a]">
+      <div className="flex w-full max-w-[680px] flex-col gap-7">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="grid size-7 place-items-center rounded-md bg-[#c2410c] font-titulo text-sm font-bold text-white" aria-hidden>D</div>
+            <h1 className="m-0 font-titulo text-[15px] font-bold tracking-[0.04em]">DEPPI</h1>
           </div>
-          <a className={styles.link} href="/login">Já tenho conta</a>
+          <a className="text-[13px] text-[#d97706] hover:text-[#f59e0b]" href="/login">Já tenho conta</a>
         </div>
 
-        <div className={styles.intro}>
-          <h2 className={styles.title}>Crie sua conta</h2>
-          <p className={styles.subtitle}>
+        <div className="flex flex-col gap-1.5">
+          <h2 className="m-0 font-titulo text-[28px] font-semibold">Crie sua conta</h2>
+          <p className="m-0 text-sm text-[#5c5c5c]">
             Você mesmo preenche seus dados — leva uns 5 minutos. Tenha seu RG, CPF e título de eleitor em mãos.
           </p>
         </div>
 
-        <div className={styles.progressWrap}>
+        <div className="flex flex-col gap-3.5">
           <div
-            className={styles.bar}
+            className="h-1 overflow-hidden rounded-sm bg-[#f1efeb]"
             role="progressbar"
             aria-valuemin={1}
             aria-valuemax={STEPS.length}
             aria-valuenow={step + 1}
             aria-label={`Passo ${step + 1} de ${STEPS.length}`}
           >
-            <div className={styles.barFill} style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
+            <div className="h-full bg-[#c2410c] transition-[width] duration-[250ms] ease-in-out" style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
           </div>
-          <ol className={styles.steps}>
+          <ol className="m-0 grid list-none grid-cols-4 gap-2 p-0">
             {STEPS.map((s, i) => {
               const state = i < step ? "done" : i === step ? "active" : "todo";
               return (
                 <li
                   key={s.label}
-                  className={[
-                    styles.step,
-                    state === "todo" ? styles.stepTodo : "",
-                    state === "active" ? styles.stepActive : "",
-                  ].join(" ")}
+                  className={`flex items-center gap-2 text-[13px] ${
+                    state === "todo" ? "text-[#6b6b6b]" : "text-[#1a1a1a]"
+                  }`}
                   aria-current={state === "active" ? "step" : undefined}
                 >
                   <span
-                    className={[
-                      styles.stepNum,
-                      state === "done" ? styles.stepNumDone : "",
-                      state === "todo" ? styles.stepNumTodo : "",
-                    ].join(" ")}
+                    className={`grid size-[22px] flex-none place-items-center rounded-full border font-mono text-[11px] font-semibold ${
+                      state === "done"
+                        ? "border-[#c2410c] bg-[#c2410c] text-white"
+                        : state === "todo"
+                          ? "border-[#d3d0c9] bg-transparent text-[#6b6b6b]"
+                          : "border-[#c2410c] bg-transparent text-[#c2410c]"
+                    }`}
                   >
                     {state === "done" ? "✓" : i + 1}
                   </span>
-                  <span className={styles.stepLabel}>{s.label}</span>
+                  <span>{s.label}</span>
                 </li>
               );
             })}
           </ol>
         </div>
 
-        <form onSubmit={onSubmit} noValidate style={{ display: "contents" }}>
-          <div className={styles.card}>
-            <h2 className={styles.cardTitle}>{STEPS[step].title}</h2>
+        <form className="contents" onSubmit={onSubmit} noValidate>
+          <div className="flex flex-col gap-5 rounded-[10px] border border-[#e4e1db] bg-white p-7">
+            <h2 className="m-0 font-titulo text-lg font-semibold">{STEPS[step].title}</h2>
 
             {serverError && (
-              <div className={styles.alert} role="alert">
+              <div className="flex items-start gap-2.5 rounded-lg border border-[rgba(185,28,28,0.25)] bg-[rgba(185,28,28,0.06)] px-3.5 py-3 text-[13px] leading-[1.4] text-[#b91c1c]" role="alert">
                 <Icon name="error" />
                 <span>{serverError}</span>
               </div>
             )}
 
             {sending && (
-              <span className={styles.hint} role="status">
+              <span className="text-xs text-[#6b6b6b]" role="status">
                 Se o servidor estava inativo, o primeiro envio pode levar até um minuto.
               </span>
             )}
 
-            <div className={styles.grid}>{fields}</div>
+            <div className="grid grid-cols-1 gap-[18px] min-[561px]:grid-cols-2">{fields}</div>
           </div>
 
-          <div className={styles.actions}>
+          <div className="flex items-center justify-between">
             {step > 0 ? (
-              <button type="button" className={`${styles.btn} ${styles.btnSecondary}`} onClick={voltar}>
+              <button type="button" className={`${BTN} border border-[#e4e1db] bg-transparent px-[18px] font-medium text-[#1a1a1a] hover:border-[#d3d0c9]`} onClick={voltar}>
                 <Icon name="back" />
                 Voltar
               </button>
             ) : (
               <span />
             )}
-            <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`} disabled={sending}>
+            <button type="submit" className={`${BTN} border-0 bg-[#c2410c] px-5 font-semibold text-white hover:enabled:bg-[#9a3412] disabled:cursor-not-allowed disabled:bg-[#f1efeb] disabled:text-[#9a9a9a]`} disabled={sending}>
               {isLast ? (sending ? "Criando conta…" : "Criar conta") : "Continuar"}
               <Icon name={isLast ? "check" : "forward"} />
             </button>

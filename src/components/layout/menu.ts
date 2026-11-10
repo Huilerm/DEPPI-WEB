@@ -13,12 +13,14 @@ const ITENS = {
   usuarios: { rotulo: "Usuários", icone: "group", caminho: "/usuarios" },
   relatorios: { rotulo: "Relatórios", icone: "bar_chart", caminho: "/relatorios" },
   perfil: { rotulo: "Perfil", icone: "person", caminho: "/perfil" },
+  inscricoes: { rotulo: "Inscrições", icone: "fact_check", caminho: "/inscricoes" },
+  professores: { rotulo: "Professores", icone: "badge", caminho: "/professores" },
 } satisfies Record<string, ItemMenu>;
 
 const MENU: Record<Cargo, (keyof typeof ITENS)[]> = {
   ALUNO: ["inicio", "perfil"],
   PROFESSOR: ["inicio", "perfil"],
-  DEPPI: ["inicio", "perfil"],
+  DEPPI: ["inicio", "cursos", "inscricoes", "professores", "perfil"],
   ADMIN: ["inicio", "cursos", "instituicoes", "usuarios", "relatorios", "perfil"],
 };
 

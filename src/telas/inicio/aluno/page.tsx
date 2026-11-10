@@ -1,5 +1,5 @@
 import type { UsuarioSessao } from "../../../types";
 
 export function InicioAluno(_props: { usuario: UsuarioSessao }) {
-  return <div className="pagina pagina--compacta" />;
+  return <div className="flex flex-col gap-5 px-8 py-7" />;
 }

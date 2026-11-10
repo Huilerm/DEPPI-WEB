@@ -29,9 +29,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <SessaoProvider value={sessao}>
-      <div className="app">
+      <div className="app flex min-h-screen bg-fundo font-corpo text-sm leading-normal text-texto">
         <Sidebar papel={sessao.papel} recolhida={recolhida} />
-        <div className="app__principal">
+        <div className="flex min-w-0 flex-1 flex-col">
           <Topbar
             titulo={atual?.rotulo ?? "Início"}
             usuario={sessao.usuario}

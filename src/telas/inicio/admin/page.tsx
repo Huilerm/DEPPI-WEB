@@ -16,7 +16,6 @@ import {
   saudacao,
 } from "../../../lib/formatadores";
 import { Icone } from "../../../components/ui/Icone";
-import "./inicio-admin.css";
 
 export const INSCRICOES: Record<
   StatusInscricao,
@@ -80,7 +79,7 @@ export function Rosca({
   let acumulado = 0;
 
   return (
-    <div className="rosca">
+    <div className="relative size-[170px] flex-none">
       <svg
         width={tamanho}
         height={tamanho}
@@ -122,9 +121,9 @@ export function Rosca({
         </g>
       </svg>
 
-      <div className="rosca__centro">
-        <span className="rosca__total">{formatarNumero(centro)}</span>
-        <span className="rosca__sub">cursos</span>
+      <div className="absolute inset-0 flex flex-col items-center justify-center leading-[1.1]">
+        <span className="font-titulo text-[28px] font-bold">{formatarNumero(centro)}</span>
+        <span className="text-xs text-texto-2">cursos</span>
       </div>
     </div>
   );
@@ -197,42 +196,42 @@ export function InicioAdmin({
     : 1;
 
   return (
-    <div className="pagina">
-      <div className="saudacao">
+    <div className="flex flex-col gap-6 px-8 py-7">
+      <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="saudacao__titulo">
+          <h1 className="font-titulo text-[28px] font-bold leading-[1.2] tracking-[-0.01em]">
             {saudacao()}, {primeiroNome(usuario.nome)}
           </h1>
 
-          <p className="saudacao__data">{dataPorExtenso()}</p>
+          <p className="mt-1 text-texto-2">{dataPorExtenso()}</p>
         </div>
 
-        <Link href="/relatorios" className="botao-secundario">
+        <Link href="/relatorios" className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-borda bg-cartao px-4 text-sm font-medium text-texto hover:bg-trilho">
           <Icone nome="bar_chart" tamanho={18} />
           Ver relatórios
         </Link>
       </div>
 
       {carregando && (
-        <p className="aviso-exemplo">Carregando resumo…</p>
+        <p className="text-xs text-texto-3">Carregando resumo…</p>
       )}
 
       {erro && (
-        <p className="aviso-exemplo" role="alert">
+        <p className="text-xs text-texto-3" role="alert">
           {erro}
         </p>
       )}
 
       {resumo && (
         <>
-          <section className="resumo">
+          <section className="grid grid-cols-[repeat(auto-fit,minmax(130px,1fr))] gap-px overflow-hidden rounded-[10px] border border-borda bg-borda">
             {totais.map((t) => (
-              <div key={t.rotulo} className="resumo__item">
-                <span className="resumo__rotulo">{t.rotulo}</span>
+              <div key={t.rotulo} className="flex flex-col gap-0.5 bg-cartao px-[18px] pb-4 pt-3.5">
+                <span className="text-xs text-texto-2">{t.rotulo}</span>
 
                 <span
-                  className={`resumo__valor${
-                    t.destaque ? " resumo__valor--destaque" : ""
+                  className={`font-titulo text-[28px] font-bold leading-[1.2] tracking-[-0.02em]${
+                    t.destaque ? " text-acento" : ""
                   }`}
                 >
                   {formatarNumero(t.valor ?? 0)}
@@ -241,19 +240,19 @@ export function InicioAdmin({
             ))}
           </section>
 
-          <div className="graficos">
-            <section className="cartao">
-              <div className="cartao__cabecalho">
-                <h2 className="cartao__titulo">
+          <div className="grid grid-cols-1 gap-4 min-[961px]:grid-cols-[1.3fr_1fr]">
+            <section className="rounded-xl border border-borda bg-cartao px-6 py-[22px]">
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="font-titulo text-base font-semibold">
                   Inscrições por situação
                 </h2>
 
-                <Link href="/relatorios" className="cartao__link">
+                <Link href="/relatorios" className="text-[13px] font-medium text-link underline">
                   Detalhes
                 </Link>
               </div>
 
-              <div className="barras">
+              <div className="flex flex-col gap-3.5">
                 {ORDEM_INSCRICAO.map((status) => {
                   const q = quantidade(
                     resumo.inscricoesPorSituacao ?? [],
@@ -263,18 +262,18 @@ export function InicioAdmin({
                   const info = INSCRICOES[status];
 
                   return (
-                    <div key={status} className="barra">
+                    <div key={status} className="grid grid-cols-[110px_1fr_56px] items-center gap-4">
                       <span
-                        className="barra__rotulo"
+                        className="flex items-center gap-2"
                         style={{ color: info.cor }}
                       >
-                        <Icone nome={info.icone} />
+                        <Icone nome={info.icone} tamanho={18} />
                         {info.rotulo}
                       </span>
 
-                      <div className="barra__trilho">
+                      <div className="h-6 overflow-hidden rounded-[5px] bg-trilho">
                         <div
-                          className="barra__preenchimento"
+                          className="h-full rounded-[5px]"
                           style={{
                             width: `${(q / maiorInscricao) * 100}%`,
                             background: info.cor,
@@ -282,7 +281,7 @@ export function InicioAdmin({
                         />
                       </div>
 
-                      <span className="numero">
+                      <span className="text-right font-mono text-[13px] font-medium">
                         {formatarNumero(q)}
                       </span>
                     </div>
@@ -291,14 +290,14 @@ export function InicioAdmin({
               </div>
             </section>
 
-            <section className="cartao">
-              <div className="cartao__cabecalho">
-                <h2 className="cartao__titulo">
+            <section className="rounded-xl border border-borda bg-cartao px-6 py-[22px]">
+              <div className="mb-5 flex items-center justify-between">
+                <h2 className="font-titulo text-base font-semibold">
                   Cursos por situação
                 </h2>
               </div>
 
-              <div className="rosca-bloco">
+              <div className="flex flex-wrap items-center gap-8">
                 <Rosca
                   centro={resumo.totais.cursos ?? 0}
                   fatias={ORDEM_CURSO.map((s) => ({
@@ -310,25 +309,24 @@ export function InicioAdmin({
                   }))}
                 />
 
-                <div className="legenda">
+                <div className="flex min-w-[150px] flex-1 flex-col gap-3.5">
                   {ORDEM_CURSO.map((status) => {
                     const info = CURSOS[status];
 
                     return (
                       <div
                         key={status}
-                        className="legenda__linha"
+                        className="flex items-center gap-2"
                         style={{ color: info.cor }}
                       >
-                        <Icone nome={info.icone} />
+                        <Icone nome={info.icone} tamanho={18} />
 
-                        <span className="legenda__rotulo">
+                        <span className="">
                           {info.rotulo}
                         </span>
 
                         <span
-                          className="numero"
-                          style={{ color: "var(--texto)" }}
+                          className="text-right font-mono text-[13px] font-medium text-texto"
                         >
                           {formatarNumero(
                             quantidade(

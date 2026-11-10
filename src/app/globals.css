@@ -1,7 +1,65 @@
-/* Estilos globais */
+@import "tailwindcss";
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* Modo escuro pelo atributo data-tema="escuro" (definido no Topbar) */
+@custom-variant dark (&:where([data-tema="escuro"], [data-tema="escuro"] *));
+
+:root {
+  --acento: #c2410c;
+  --link: #d97706;
+  --texto: #1a1a1a;
+  --texto-2: #5c5c5c;
+  --texto-3: #6b6b6b;
+  --fundo: #faf9f7;
+  --sidebar: #f4f3ef;
+  --borda: #e4e1db;
+  --cartao: #ffffff;
+  --trilho: #efeeeb;
+}
+
+:root[data-tema="escuro"] {
+  color-scheme: dark;
+  --texto: #f2f0ec;
+  --texto-2: #b8b4ac;
+  --texto-3: #9a968e;
+  --fundo: #171615;
+  --sidebar: #1f1e1c;
+  --borda: #33312d;
+  --cartao: #1f1e1c;
+  --trilho: #2b2a27;
+}
+
+/* Cores e fontes viram classes: bg-fundo, text-texto-2, border-borda, font-titulo... */
+@theme inline {
+  --color-acento: var(--acento);
+  --color-link: var(--link);
+  --color-texto: var(--texto);
+  --color-texto-2: var(--texto-2);
+  --color-texto-3: var(--texto-3);
+  --color-fundo: var(--fundo);
+  --color-sidebar: var(--sidebar);
+  --color-borda: var(--borda);
+  --color-cartao: var(--cartao);
+  --color-trilho: var(--trilho);
+
+  --font-titulo: var(--fonte-titulo), system-ui, sans-serif;
+  --font-corpo: var(--fonte-corpo), system-ui, sans-serif;
+  --font-mono: var(--fonte-mono), ui-monospace, monospace;
+  --font-icone: "Material Symbols Rounded";
+}
+
+/* Seta customizada dos <select> */
+@utility seta-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+}
+
+/* Anel de foco dentro da área logada */
+@layer base {
+  .app :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.35);
+  }
 }

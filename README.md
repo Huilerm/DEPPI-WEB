@@ -6,16 +6,16 @@ Frontend do **DEPPI — sistema de gerenciamento de cursos, inscrições e usuá
 
 ## Tecnologias
 
-- [Next.js](https://nextjs.org/)
-- [React](https://react.dev/)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
 
 ## Pré-requisitos
 
 Antes de executar o projeto, instale:
 
-- [Node.js](https://nodejs.org/) (versão LTS recomendada).
+- Node.js.
 - npm, que é instalado junto com o Node.js.
 - Git, caso queira clonar o repositório.
 

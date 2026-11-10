@@ -46,19 +46,7 @@ cd DEPPI-WEB
 npm install
 ```
 
-### 4. Configure a URL da API (opcional)
-
-O frontend utiliza a API do DeppiAPI. Para apontar para outra instância, crie um arquivo chamado `.env.local` na raiz do projeto e informe:
-
-```env
-NEXT_PUBLIC_API_URL=https://deppiapi-q96m.onrender.com
-```
-
-A aplicação já possui essa URL como padrão em sua configuração; portanto, se ela continuar sendo a API utilizada, essa variável pode ser omitida. Em desenvolvimento, altere o valor caso esteja executando a API em outro endereço.
-
-**Não envie arquivos `.env.local` com credenciais ou configurações privadas para o GitHub.**
-
-### 5. Inicie o servidor de desenvolvimento
+### 4. Inicie o servidor de desenvolvimento
 
 ```bash
 npm run dev

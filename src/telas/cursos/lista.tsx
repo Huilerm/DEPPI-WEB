@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Curso, StatusCurso } from "../../types";
 import { buscarCursos, buscarUrlCapa } from "../../lib/api";
 import { Icone } from "../../components/ui/Icone";
+import { useSessao } from "../../components/layout/SessaoContext";
 import { STATUS, dataBR, hora } from "./util";
 import { AVISO_ERRO, BTN_PRIM, PAGINA, SELO, TOPO, CAPA_FUNDO } from "../../components/ui/estilos";
 
@@ -16,6 +17,8 @@ const FILTRO_SELECT_INST =
 
 export function CursosPage() {
   const router = useRouter();
+  const { papel } = useSessao();
+  const podeGerenciar = papel === "ADMIN" || papel === "DEPPI";
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
@@ -100,7 +103,7 @@ export function CursosPage() {
           <h1>Cursos</h1>
           <p>{cursos.length} cursos em {instituicoes.length} instituições</p>
         </div>
-        <button className={BTN_PRIM} onClick={() => router.push("/cursos/novo")}>+ Novo curso</button>
+        {podeGerenciar && <button className={BTN_PRIM} onClick={() => router.push("/cursos/novo")}>+ Novo curso</button>}
       </div>
 
       <div className="flex flex-wrap gap-3">

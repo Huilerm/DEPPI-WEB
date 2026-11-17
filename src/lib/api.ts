@@ -105,9 +105,40 @@ export type MinhaInscricao = {
   documentos: {
     id: string;
     nomeOriginal: string;
-    categoria: string | null;
+    categoria: CategoriaDocumento | null;
     criadoEm: string;
   }[];
+  rendaFamiliar?: {
+    rendaFamiliar: number;
+    numeroPessoas: number;
+  } | null;
+};
+
+export type CategoriaDocumento =
+  | "RG"
+  | "CPF"
+  | "COMPROVANTE_RESIDENCIA"
+  | "COMPROVANTE_RENDA"
+  | "HISTORICO_ESCOLAR"
+  | "OUTRO";
+
+export type DocumentoInscricao = {
+  id: string;
+  nomeOriginal: string;
+  nomeArquivo: string;
+  caminho: string;
+  tipoMime: string;
+  tamanho: number;
+  categoria: CategoriaDocumento | null;
+  criadoEm: string;
+  fkInscricao: string;
+};
+
+export type RendaFamiliarInscricao = {
+  id?: string;
+  rendaFamiliar: number;
+  numeroPessoas: number;
+  fkInscricao?: string;
 };
 
 export async function buscarMinhasInscricoes(): Promise<MinhaInscricao[]> {
@@ -117,6 +148,59 @@ export async function buscarMinhasInscricoes(): Promise<MinhaInscricao[]> {
     throw new Error("Resposta inválida ao buscar suas inscrições.");
   }
   return dados.inscricoes as MinhaInscricao[];
+}
+
+export async function registrarRendaFamiliar(
+  inscricaoId: string,
+  dados: { rendaFamiliar: number; numeroPessoas: number }
+): Promise<RendaFamiliarInscricao> {
+  const r = await chamar(`/inscricoes/${encodeURIComponent(inscricaoId)}/renda`, {
+    method: "POST",
+    body: JSON.stringify(dados),
+  });
+
+  const resposta = await r.json();
+  if (!resposta.renda) {
+    throw new Error("A API não retornou os dados da renda familiar.");
+  }
+  return resposta.renda as RendaFamiliarInscricao;
+}
+
+export async function enviarDocumentoInscricao(
+  inscricaoId: string,
+  arquivo: File,
+  categoria: CategoriaDocumento
+): Promise<DocumentoInscricao> {
+  const form = new FormData();
+  form.append("arquivo", arquivo);
+  form.append("categoria", categoria);
+
+  const r = await chamar(`/inscricoes/${encodeURIComponent(inscricaoId)}/documentos`, {
+    method: "POST",
+    body: form,
+  });
+
+  const resposta = await r.json();
+  if (!resposta.documento) {
+    throw new Error("A API não retornou os dados do documento enviado.");
+  }
+  return resposta.documento as DocumentoInscricao;
+}
+
+export async function buscarDocumentosInscricao(
+  inscricaoId: string
+): Promise<DocumentoInscricao[]> {
+  const r = await chamar(`/inscricoes/${encodeURIComponent(inscricaoId)}/documentos`);
+  const resposta = await r.json();
+
+  if (!Array.isArray(resposta.documentos)) {
+    throw new Error("Resposta inválida ao buscar os documentos da inscrição.");
+  }
+  return resposta.documentos as DocumentoInscricao[];
+}
+
+export async function removerDocumentoInscricao(documentoId: string): Promise<void> {
+  await chamar(`/documentos/${encodeURIComponent(documentoId)}`, { method: "DELETE" });
 }
 
 export async function criarInscricao(cursoId: string): Promise<void> {

@@ -8,9 +8,11 @@ import {
   cancelarInscricao,
   buscarHistoricoInscricao,
   buscarInscricoes,
+  buscarDocumentosInscricao,
   rejeitarInscricao,
   type HistoricoInscricao,
   type InscricaoDetalhe,
+  type DocumentoInscricao,
 } from "../../lib/api";
 import { Avatar } from "../../components/ui/Avatar";
 import { Icone } from "../../components/ui/Icone";
@@ -50,6 +52,23 @@ function classeStatus(status: StatusInscricao) {
   })[status];
 }
 
+function categoriaDocumentoLabel(categoria?: string | null) {
+  return ({
+    RG: "RG",
+    CPF: "CPF",
+    COMPROVANTE_RESIDENCIA: "Comprovante de residência",
+    COMPROVANTE_RENDA: "Comprovante de renda",
+    HISTORICO_ESCOLAR: "Histórico escolar",
+    OUTRO: "Outro",
+  } as Record<string, string>)[categoria ?? "OUTRO"] ?? "Outro";
+}
+
+function tamanhoDocumento(bytes: number) {
+  return bytes < 1024 * 1024
+    ? `${Math.max(1, Math.round(bytes / 1024))} KB`
+    : `${(bytes / (1024 * 1024)).toFixed(1).replace(".", ",")} MB`;
+}
+
 export function InscricoesPage() {
   const { papel } = useSessao();
   if (papel === "ALUNO") return <MinhasInscricoesAlunoPage />;
@@ -61,6 +80,7 @@ export function InscricoesPage() {
   const [erro, setErro] = useState<string | null>(null);
   const [selecionada, setSelecionada] = useState<InscricaoDetalhe | null>(null);
   const [historico, setHistorico] = useState<HistoricoInscricao[]>([]);
+  const [documentos, setDocumentos] = useState<DocumentoInscricao[]>([]);
   const [carregandoDetalhes, setCarregandoDetalhes] = useState(false);
   const [acao, setAcao] = useState<"APROVAR" | "REJEITAR" | "CANCELAR" | null>(null);
   const [motivo, setMotivo] = useState("");
@@ -109,12 +129,14 @@ export function InscricoesPage() {
     setMensagem(null);
     setAcao(null);
     try {
-      const [detalhe, eventos] = await Promise.all([
+      const [detalhe, eventos, arquivos] = await Promise.all([
         buscarDetalhesInscricao(item.id),
         buscarHistoricoInscricao(item.id),
+        buscarDocumentosInscricao(item.id),
       ]);
       setSelecionada(detalhe);
       setHistorico(eventos);
+      setDocumentos(arquivos);
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Não foi possível consultar os detalhes.");
     } finally {
@@ -138,12 +160,14 @@ export function InscricoesPage() {
       setAcao(null);
       setMotivo("");
       await carregar();
-      const [detalhe, eventos] = await Promise.all([
+      const [detalhe, eventos, arquivos] = await Promise.all([
         buscarDetalhesInscricao(selecionada.id),
         buscarHistoricoInscricao(selecionada.id),
+        buscarDocumentosInscricao(selecionada.id),
       ]);
       setSelecionada(detalhe);
       setHistorico(eventos);
+      setDocumentos(arquivos);
     } catch (e) {
       setErroAcao(e instanceof Error ? e.message : "Não foi possível concluir a operação.");
     } finally {
@@ -154,6 +178,7 @@ export function InscricoesPage() {
   const fecharDetalhes = () => {
     if (!processando) {
       setSelecionada(null);
+      setDocumentos([]);
       setAcao(null);
       setMotivo("");
       setErroAcao(null);
@@ -262,6 +287,29 @@ export function InscricoesPage() {
               </dl></section>
               {selecionada.rendaFamiliar && <section className="rounded-xl border border-borda bg-cartao p-5 md:col-span-2"><h3 className="font-titulo text-sm font-semibold">Renda familiar</h3><dl className="mt-3 grid grid-cols-2 gap-4"><div><dt className="text-xs text-texto-3">Renda mensal da família</dt><dd className="mt-1 text-sm font-semibold">{Number(selecionada.rendaFamiliar.rendaFamiliar).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</dd></div><div><dt className="text-xs text-texto-3">Pessoas na casa</dt><dd className="mt-1 text-sm font-semibold">{selecionada.rendaFamiliar.numeroPessoas}</dd></div></dl></section>}
             </div>
+
+            <section className="mt-4 rounded-xl border border-borda bg-cartao p-5 md:col-span-2">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="font-titulo text-sm font-semibold">Documentos enviados</h3>
+                <span className="font-mono text-xs text-texto-3">{documentos.length}</span>
+              </div>
+              {documentos.length === 0 ? (
+                <p className="mt-3 text-sm text-texto-2">O aluno ainda não enviou documentos para esta inscrição.</p>
+              ) : (
+                <ul className="mt-3 divide-y divide-borda">
+                  {documentos.map((doc) => <li key={doc.id} className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                    <div className="flex min-w-0 items-start gap-2.5">
+                      <Icone nome="description" tamanho={18} className="mt-0.5 shrink-0 text-texto-3" />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium">{doc.nomeOriginal}</p>
+                        <p className="mt-0.5 text-xs text-texto-2">{categoriaDocumentoLabel(doc.categoria)} · {dataHora(doc.criadoEm)} · {tamanhoDocumento(doc.tamanho)}</p>
+                      </div>
+                    </div>
+                    <a href={doc.caminho} target="_blank" rel="noreferrer" className="inline-flex h-8 shrink-0 items-center rounded-md border border-borda px-3 text-xs font-semibold text-texto hover:bg-trilho">Visualizar documento</a>
+                  </li>)}
+                </ul>
+              )}
+            </section>
 
             <section className="mt-4 rounded-xl border border-borda bg-cartao p-5"><h3 className="font-titulo text-sm font-semibold">Histórico da inscrição</h3>
               {historico.length === 0 ? <p className="mt-3 text-sm text-texto-2">Nenhuma alteração registrada.</p> : <ol className="mt-4 space-y-4">{historico.map((h, n) => <li key={h.id || `${h.dataModificacao}-${n}`} className="relative border-l-2 border-[#e9d4c8] pl-4"><span className="absolute -left-[5px] top-1 size-2 rounded-full bg-acento" /><div className="flex flex-wrap items-center justify-between gap-2"><strong className="text-[13px]">{h.alteracao} · {h.statusAnterior} → {h.statusAtual}</strong><span className="font-mono text-[11px] text-texto-3">{dataHora(h.dataModificacao)}</span></div><p className="mt-1 text-[13px] text-texto-2">{h.descricao}</p>{h.usuario?.nome && <p className="mt-1 text-xs text-texto-3">Por {h.usuario.nome}</p>}</li>)}</ol>}

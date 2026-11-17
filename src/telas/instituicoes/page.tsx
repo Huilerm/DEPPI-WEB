@@ -17,7 +17,7 @@ import {
     criarInstituicao,
     atualizarInstituicao,
     excluirInstituicao
-} from "../../lib/api";
+} from "../../services/instituicoesService";
 
 
 type FormularioInstituicao = Pick<

@@ -9,7 +9,7 @@ import {
   enviarCapa,
   excluirCurso,
   atualizarCurso,
-} from "../../lib/api";
+} from "../../services/cursosService";
 import { Icone } from "../../components/ui/Icone";
 import { STATUS, dataBR, hora } from "./util";
 import {

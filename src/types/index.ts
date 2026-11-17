@@ -76,3 +76,30 @@ export interface CursoRelatorio {
   status: StatusCurso;
   _count: { inscricao: number };
 }
+
+export interface ProfessorUsuario {
+  id: string;
+  nome: string;
+  nomeSocial: string | null;
+  emailInstitucional: string;
+  emailSecundario: string | null;
+}
+
+export interface Professor {
+  id: string;
+  siape: string;
+  emailSiape: string | null;
+  emailNotificacoes: string | null;
+  emailClassroom: string | null;
+  telefonesInstitucionais: string[];
+  telefonesPessoais: string[];
+  emPGD: boolean | null;
+  titulacao: string | null;
+  escolaridade: string | null;
+  setorSuap: string | null;
+  lotacaoSiape: string | null;
+  situacao: string | null;
+  regimeTrabalho: string | null;
+  jornadaTrabalho: string | null;
+  usuario: ProfessorUsuario;
+}

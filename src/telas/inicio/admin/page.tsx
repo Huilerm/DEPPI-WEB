@@ -8,7 +8,7 @@ import type {
   StatusInscricao,
   UsuarioSessao,
 } from "../../../types";
-import { buscarResumoSistema } from "../../../lib/api";
+import { buscarResumoSistema } from "../../../services/relatoriosService";
 import {
   dataPorExtenso,
   formatarNumero,

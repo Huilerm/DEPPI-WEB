@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Curso, StatusCurso } from "../../types";
-import { buscarCursos, buscarUrlCapa } from "../../lib/api";
+import { buscarCursos, buscarUrlCapa } from "../../services/cursosService";
 import { Icone } from "../../components/ui/Icone";
 import { STATUS, dataBR, hora } from "./util";
 import { AVISO_ERRO, BTN_PRIM, PAGINA, SELO, TOPO, CAPA_FUNDO } from "../../components/ui/estilos";

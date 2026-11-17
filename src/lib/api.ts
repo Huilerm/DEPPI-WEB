@@ -6,6 +6,7 @@ import type {
   UsuarioLista,
   StatusCurso,
   InscricaoResumo,
+  StatusInscricao,
 } from "../types";
 
 import { lerToken } from "./sessao";
@@ -60,9 +61,97 @@ export async function buscarUsuarios(): Promise<UsuarioLista[]> {
   return (await r.json()) as UsuarioLista[];
 }
 
+export type HistoricoInscricao = {
+  id?: string;
+  alteracao: string;
+  descricao: string;
+  statusAnterior: StatusInscricao;
+  statusAtual: StatusInscricao;
+  dataModificacao: string;
+  usuario?: { id: string; nome: string; emailInstitucional: string };
+};
+
+export type InscricaoDetalhe = InscricaoResumo & {
+  rendaFamiliar?: { rendaFamiliar: number; numeroPessoas: number } | null;
+  historico?: HistoricoInscricao[];
+};
+
+export async function buscarInscricoes(status?: StatusInscricao): Promise<InscricaoResumo[]> {
+  const query = status ? `?status=${encodeURIComponent(status)}` : "";
+  const r = await chamar(`/inscricoes${query}`);
+  const dados = await r.json();
+  if (!Array.isArray(dados.inscricoes)) throw new Error("Resposta inválida ao listar inscrições.");
+  return dados.inscricoes as InscricaoResumo[];
+}
+
 export async function buscarInscricoesPendentes(): Promise<InscricaoResumo[]> {
-  const r = await chamar("/inscricoes?status=PENDENTE");
-  return ((await r.json()) as { inscricoes: InscricaoResumo[] }).inscricoes;
+  return buscarInscricoes("PENDENTE");
+}
+
+export type MinhaInscricao = {
+  id: string;
+  data: string;
+  status: StatusInscricao;
+  curso: {
+    id: string;
+    nome: string;
+    dataInicio: string;
+    dataFim: string;
+    horarioInicio: string;
+    horarioFim: string;
+    carga_horaria: number;
+    Instituicao: { nome: string; campus: string } | null;
+  };
+  documentos: {
+    id: string;
+    nomeOriginal: string;
+    categoria: string | null;
+    criadoEm: string;
+  }[];
+};
+
+export async function buscarMinhasInscricoes(): Promise<MinhaInscricao[]> {
+  const r = await chamar("/inscricoes/minhas");
+  const dados = await r.json();
+  if (!Array.isArray(dados.inscricoes)) {
+    throw new Error("Resposta inválida ao buscar suas inscrições.");
+  }
+  return dados.inscricoes as MinhaInscricao[];
+}
+
+export async function criarInscricao(cursoId: string): Promise<void> {
+  await chamar("/inscricoes", { method: "POST", body: JSON.stringify({ cursoId }) });
+}
+
+export async function buscarDetalhesInscricao(id: string): Promise<InscricaoDetalhe> {
+  const r = await chamar(`/inscricoes/${encodeURIComponent(id)}`);
+  const dados = await r.json();
+  if (!dados.inscricao) throw new Error("A API não retornou os detalhes da inscrição.");
+  return dados.inscricao as InscricaoDetalhe;
+}
+
+export async function buscarHistoricoInscricao(id: string): Promise<HistoricoInscricao[]> {
+  const r = await chamar(`/inscricoes/${encodeURIComponent(id)}/historico`);
+  const dados = await r.json();
+  return Array.isArray(dados.historico) ? dados.historico as HistoricoInscricao[] : [];
+}
+
+export async function aprovarInscricao(id: string): Promise<void> {
+  await chamar(`/inscricoes/${encodeURIComponent(id)}/aprovar`, { method: "PATCH" });
+}
+
+export async function rejeitarInscricao(id: string, motivo: string): Promise<void> {
+  await chamar(`/inscricoes/${encodeURIComponent(id)}/rejeitar`, {
+    method: "PATCH",
+    body: JSON.stringify({ motivo }),
+  });
+}
+
+export async function cancelarInscricao(id: string, motivo?: string): Promise<void> {
+  await chamar(`/inscricoes/${encodeURIComponent(id)}/cancelar`, {
+    method: "PATCH",
+    body: JSON.stringify(motivo ? { motivo } : {}),
+  });
 }
 
 export async function contarProfessores(): Promise<number> {

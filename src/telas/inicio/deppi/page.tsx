@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { Curso, InscricaoResumo, UsuarioSessao } from "../../../types";
-import { buscarCursos, buscarInscricoesPendentes, contarProfessores } from "../..//../lib/api";
+import { buscarCursos } from "../../../services/cursosService";
+import { buscarInscricoesPendentes } from "../../../services/inscricoesService";
+import { contarProfessores } from "../../../services/professorService";
 import { dataPorExtenso, formatarNumero, primeiroNome, saudacao } from "../../../lib/formatadores";
 import { Avatar } from "../../../components/ui/Avatar";
 import { Icone } from "../../../components/ui/Icone";

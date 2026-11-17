@@ -3,9 +3,8 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import type { Curso, Instituicao } from "../../types";
-import {
-  atualizarCurso, buscarInstituicoes, criarCurso, enviarCapa,
-} from "../../lib/api";
+import { atualizarCurso, criarCurso, enviarCapa } from "../../services/cursosService";
+import { buscarInstituicoes } from "../../services/instituicoesService";
 import { dataParaApi, horaParaApi, hora } from "./util";
 import {
   AVISO, AVISO_ERRO, BTN, BTN_PRIM, CAMPO_INPUT, CAMPO_LABEL, CAMPO_SELECT, LAYOUT2, PAINEL, PAINEL_TITULO, PAGINA, TOPO,

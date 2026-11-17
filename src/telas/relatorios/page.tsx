@@ -6,7 +6,7 @@ import {
     buscarCursosRelatorio,
     buscarResumoSistema,
     exportarCsv, //Importação da função exportarCsv do arquivo api.ts
-} from "../../lib/api";
+} from "../../services/relatoriosService";
 import { formatarNumero } from "../../lib/formatadores";
 import { Icone } from "../../components/ui/Icone";
 import {

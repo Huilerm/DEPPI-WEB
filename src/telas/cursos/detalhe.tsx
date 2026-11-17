@@ -10,9 +10,8 @@ import {
   enviarCapa,
   excluirCurso,
   atualizarCurso,
-  criarInscricao,
-  buscarMinhasInscricoes,
-} from "../../lib/api";
+} from "../../services/cursosService";
+import { criarInscricao, buscarMinhasInscricoes } from "../../services/inscricoesService";
 import { Icone } from "../../components/ui/Icone";
 import { STATUS, dataBR, hora } from "./util";
 import {
@@ -50,125 +49,125 @@ export function CursoDetalhePage() {
     void carregarCapa();
   }, [id]);
   useEffect(() => {
-  if (!ehAluno) return;
+    if (!ehAluno) return;
 
-  let ativo = true;
+    let ativo = true;
 
-  async function verificarInscricao() {
-    setVerificandoInscricao(true);
-    setFalhaVerificacaoInscricao(false);
+    async function verificarInscricao() {
+      setVerificandoInscricao(true);
+      setFalhaVerificacaoInscricao(false);
 
-    try {
-      const inscricoes = await buscarMinhasInscricoes();
+      try {
+        const inscricoes = await buscarMinhasInscricoes();
 
-      if (ativo) {
-        const inscrito = inscricoes.some(
-          (inscricao) => String(inscricao.curso.id) === String(id)
-        );
+        if (ativo) {
+          const inscrito = inscricoes.some(
+            (inscricao: { curso: { id: string | number } }) =>
+              String(inscricao.curso.id) === String(id));
 
-        setJaInscrito(inscrito);
+          setJaInscrito(inscrito);
+        }
+      } catch {
+        if (ativo) {
+          setFalhaVerificacaoInscricao(true);
+          setErro("Não foi possível verificar sua inscrição. Atualize a página e tente novamente.");
+        }
+      } finally {
+        if (ativo) setVerificandoInscricao(false);
       }
-    } catch {
-      if (ativo) {
-        setFalhaVerificacaoInscricao(true);
-        setErro("Não foi possível verificar sua inscrição. Atualize a página e tente novamente.");
-      }
-    } finally {
-      if (ativo) setVerificandoInscricao(false);
     }
-  }
 
-  void verificarInscricao();
+    void verificarInscricao();
 
-  return () => {
-    ativo = false;
-  };
-}, [id, ehAluno]);
+    return () => {
+      ativo = false;
+    };
+  }, [id, ehAluno]);
   async function trocarCapa(a?: File) {
     if (!a) return;
     try { await enviarCapa(id, a); await carregarCapa(); }
     catch (e) { setErro(e instanceof Error ? e.message : "Falha ao enviar a capa."); }
   }
 
-async function alterarStatus(novoStatus: StatusCurso) {
-  if (!curso || salvandoStatus) return;
+  async function alterarStatus(novoStatus: StatusCurso) {
+    if (!curso || salvandoStatus) return;
 
-  if (novoStatus === curso.status) return;
+    if (novoStatus === curso.status) return;
 
-  const cursoAnterior = curso;
+    const cursoAnterior = curso;
 
-  setCurso({
-    ...curso,
-    status: novoStatus,
-  });
-
-  setSalvandoStatus(true);
-  setErro(null);
-
-  try {
-    const atualizado = await atualizarCurso(id, {
+    setCurso({
+      ...curso,
       status: novoStatus,
     });
 
-    // Atualiza os dados sem perder as informações complementares.
-    setCurso((anterior) => {
-      if (!anterior) return atualizado;
+    setSalvandoStatus(true);
+    setErro(null);
 
-      return {
-        ...anterior,
-        ...atualizado,
+    try {
+      const atualizado = await atualizarCurso(id, {
+        status: novoStatus,
+      });
 
-        Instituicao: atualizado.Instituicao ?? anterior.Instituicao,
-        vagasDisponiveis:
-          atualizado.vagasDisponiveis ?? anterior.vagasDisponiveis,
-        vagasOcupadas:
-          atualizado.vagasOcupadas ?? anterior.vagasOcupadas,
-      };
-    });
+      // Atualiza os dados sem perder as informações complementares.
+      setCurso((anterior) => {
+        if (!anterior) return atualizado;
 
-  } catch (e) {
-    setCurso(cursoAnterior);
+        return {
+          ...anterior,
+          ...atualizado,
 
-    setErro(
-      e instanceof Error
-        ? e.message
-        : "Não foi possível atualizar o status do curso."
-    );
-  } finally {
-    setSalvandoStatus(false);
+          Instituicao: atualizado.Instituicao ?? anterior.Instituicao,
+          vagasDisponiveis:
+            atualizado.vagasDisponiveis ?? anterior.vagasDisponiveis,
+          vagasOcupadas:
+            atualizado.vagasOcupadas ?? anterior.vagasOcupadas,
+        };
+      });
+
+    } catch (e) {
+      setCurso(cursoAnterior);
+
+      setErro(
+        e instanceof Error
+          ? e.message
+          : "Não foi possível atualizar o status do curso."
+      );
+    } finally {
+      setSalvandoStatus(false);
+    }
   }
-}
 
   async function inscrever() {
-  if (!curso || inscrevendo || jaInscrito) return;
+    if (!curso || inscrevendo || jaInscrito) return;
 
-  setInscrevendo(true);
-  setErro(null);
-  setMensagemInscricao(null);
+    setInscrevendo(true);
+    setErro(null);
+    setMensagemInscricao(null);
 
-  try {
-    console.log("Enviando inscrição para o curso:", curso.id);
+    try {
+      console.log("Enviando inscrição para o curso:", curso.id);
 
-    const resposta = await criarInscricao(curso.id);
+      const resposta = await criarInscricao(curso.id);
 
-    console.log("Resposta da API:", resposta);
+      console.log("Resposta da API:", resposta);
 
-    setJaInscrito(true);
-    setModalInscricao(false);
+      setJaInscrito(true);
+      setModalInscricao(false);
 
-    setMensagemInscricao("Inscrição realizada com sucesso!");
-  } catch (e) {
-    console.error("Erro ao realizar inscrição:", e);
+      setMensagemInscricao("Inscrição realizada com sucesso!");
+    } catch (e) {
+      console.error("Erro ao realizar inscrição:", e);
 
-    setErro(
-      e instanceof Error
-        ? e.message
-        : "Erro ao realizar inscrição. Tente novamente."
-    );
-  } finally {
-    setInscrevendo(false);
+      setErro(
+        e instanceof Error
+          ? e.message
+          : "Erro ao realizar inscrição. Tente novamente."
+      );
+    } finally {
+      setInscrevendo(false);
+    }
   }
-}
 
   async function excluir() {
     setExcluindo(true);
@@ -242,27 +241,27 @@ async function alterarStatus(novoStatus: StatusCurso) {
             <p className="text-sm text-texto-2">Faça sua inscrição para participar deste curso. A solicitação ficará pendente até a análise do DEPPI.</p>
             <p className="text-sm">{curso.vagasDisponiveis > 0 ? `${curso.vagasDisponiveis} vaga(s) disponível(is)` : "Não há vagas disponíveis"}</p>
             <button
-  className={BTN_PRIM}
-  disabled={
-    verificandoInscricao ||
-    falhaVerificacaoInscricao ||
-    jaInscrito ||
-    inscrevendo ||
-    curso.vagasDisponiveis <= 0 ||
-    curso.status !== "ANDAMENTO"
-  }
-  onClick={() => setModalInscricao(true)}
->
-  <Icone nome={jaInscrito ? "check_circle" : "person_add"} />
+              className={BTN_PRIM}
+              disabled={
+                verificandoInscricao ||
+                falhaVerificacaoInscricao ||
+                jaInscrito ||
+                inscrevendo ||
+                curso.vagasDisponiveis <= 0 ||
+                curso.status !== "ANDAMENTO"
+              }
+              onClick={() => setModalInscricao(true)}
+            >
+              <Icone nome={jaInscrito ? "check_circle" : "person_add"} />
 
-  {verificandoInscricao
-    ? "Verificando inscrição..."
-    : falhaVerificacaoInscricao
-      ? "Não foi possível verificar"
-      : jaInscrito
-        ? "Você já está inscrito"
-        : "Inscrever-se"}
-</button>
+              {verificandoInscricao
+                ? "Verificando inscrição..."
+                : falhaVerificacaoInscricao
+                  ? "Não foi possível verificar"
+                  : jaInscrito
+                    ? "Você já está inscrito"
+                    : "Inscrever-se"}
+            </button>
           </div>
         ) : <div className={`${PAINEL} flex flex-col gap-2.5`}>
           <h2 className="font-titulo text-[15px] font-semibold">Gerenciar curso</h2>

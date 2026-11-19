@@ -103,3 +103,65 @@ export interface Professor {
   jornadaTrabalho: string | null;
   usuario: ProfessorUsuario;
 }
+
+export interface MinhaInscricao {
+  id: string;
+  data: string;
+  status: StatusInscricao;
+
+  curso?: {
+    id?: string;
+    nome: string;
+    vagas?: number;
+    Instituicao?: {
+      nome?: string;
+      campus?: string;
+    };
+  };
+
+  documentos?: DocumentoInscricao[];
+
+  rendaFamiliar?: {
+    rendaFamiliar: number;
+    numeroPessoas: number;
+  } | null;
+}
+
+export type CategoriaDocumento =
+  | "RG"
+  | "CPF"
+  | "COMPROVANTE_RESIDENCIA"
+  | "COMPROVANTE_RENDA"
+  | "HISTORICO_ESCOLAR"
+  | "OUTRO";
+
+export interface DocumentoInscricao {
+  id: string;
+  categoria: CategoriaDocumento | null;
+  nomeOriginal: string;
+  caminho: string;
+  tamanho: number;
+  tipoMime?: string;
+  criadoEm: string;
+}
+
+export interface RendaFamiliar {
+  rendaFamiliar: number;
+  numeroPessoas: number;
+}
+
+export interface InscricaoDetalhe extends InscricaoResumo {
+  rendaFamiliar?: RendaFamiliar | null;
+}
+
+export interface HistoricoInscricao {
+  id: string;
+  alteracao: string;
+  statusAnterior: StatusInscricao | null;
+  statusAtual: StatusInscricao;
+  dataModificacao: string;
+  descricao: string;
+  usuario?: {
+    nome?: string;
+  } | null;
+}

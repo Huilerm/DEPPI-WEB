@@ -61,3 +61,17 @@ export async function apiFetch(
   return resposta;
 
 }
+
+export async function abrirDocumento(documentoId: string) {
+
+  const aba = window.open("", "_blank"); //Abre nova aba
+  try {
+    const resposta = await apiFetch(`/documentos/${documentoId}/url`); //Faz a requisição no back
+    const { url } = (await resposta.json()) as { url: string }; //Transforma a resposta em JSON
+    if (aba) aba.location.href = url; //Direciona nova aba para o documento
+    else window.location.href = url;
+  } catch (erro) { //Trata erros
+    aba?.close();
+    throw erro;
+  }
+}

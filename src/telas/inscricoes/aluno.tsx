@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Icone } from "../../components/ui/Icone";
 import { useSessao } from "../../components/layout/SessaoContext";
-import { buscarMinhasInscricoes, type MinhaInscricao } from "../../lib/api";
-import type { StatusInscricao } from "../../types";
+import { buscarMinhasInscricoes } from "../../services/inscricoesService";
+import type { MinhaInscricao, StatusInscricao } from "../../types";
 
 type Filtro = "TODAS" | StatusInscricao;
 const STATUS: Record<StatusInscricao, { rotulo: string; classe: string; icone: string }> = {

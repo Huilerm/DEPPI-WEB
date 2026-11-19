@@ -1,7 +1,14 @@
 "use client";
 
+import { abrirDocumento } from "../../lib/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { InscricaoResumo, StatusInscricao } from "../../types";
+import type {
+  InscricaoResumo,
+  StatusInscricao,
+  HistoricoInscricao,
+  InscricaoDetalhe,
+  DocumentoInscricao,
+} from "../../types";
 import {
   aprovarInscricao,
   buscarDetalhesInscricao,
@@ -10,10 +17,7 @@ import {
   buscarInscricoes,
   buscarDocumentosInscricao,
   rejeitarInscricao,
-  type HistoricoInscricao,
-  type InscricaoDetalhe,
-  type DocumentoInscricao,
-} from "../../lib/api";
+} from "../../services/inscricoesService";
 import { Avatar } from "../../components/ui/Avatar";
 import { Icone } from "../../components/ui/Icone";
 import { useSessao } from "../../components/layout/SessaoContext";
@@ -305,8 +309,13 @@ export function InscricoesPage() {
                         <p className="mt-0.5 text-xs text-texto-2">{categoriaDocumentoLabel(doc.categoria)} · {dataHora(doc.criadoEm)} · {tamanhoDocumento(doc.tamanho)}</p>
                       </div>
                     </div>
-                    <a href={doc.caminho} target="_blank" rel="noreferrer" className="inline-flex h-8 shrink-0 items-center rounded-md border border-borda px-3 text-xs font-semibold text-texto hover:bg-trilho">Visualizar documento</a>
-                  </li>)}
+                    <button
+                      type="button"
+                      onClick={() => abrirDocumento(doc.id).catch((e) => alert(e.message))}
+                      className="inline-flex h-8 shrink-0 items-center rounded-md border border-borda px-3 text-xs font-semibold text-texto hover:bg-trilho"
+                    >
+                      Visualizar documento
+                    </button>                  </li>)}
                 </ul>
               )}
             </section>

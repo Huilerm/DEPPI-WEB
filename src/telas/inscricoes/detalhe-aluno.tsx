@@ -1,5 +1,6 @@
 "use client";
 
+import { abrirDocumento } from "../../lib/api";
 import { useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Icone } from "../../components/ui/Icone";
@@ -9,10 +10,12 @@ import {
   enviarDocumentoInscricao,
   registrarRendaFamiliar,
   removerDocumentoInscricao,
-  type CategoriaDocumento,
-  type DocumentoInscricao,
-  type MinhaInscricao,
-} from "../../lib/api";
+} from "../../services/inscricoesService";
+import type {
+  CategoriaDocumento,
+  DocumentoInscricao,
+  MinhaInscricao,
+} from "../../types";
 import type { StatusInscricao } from "../../types";
 
 const CATEGORIAS: { valor: CategoriaDocumento; rotulo: string; obrigatoria: boolean }[] = [
@@ -341,8 +344,13 @@ export function DetalheInscricaoAlunoPage() {
               </div>
               <span className="hidden whitespace-nowrap font-mono text-[11px] text-texto-2 sm:block">{dataBR(doc.criadoEm)}</span>
               <span className="hidden whitespace-nowrap font-mono text-[11px] text-texto-2 md:block">{tamanhoDocumento(doc.tamanho)}</span>
-              <a href={doc.caminho} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="inline-flex h-8 shrink-0 items-center rounded-lg bg-[#f2f0ec] px-3 text-[11px] font-medium text-texto hover:bg-trilho dark:bg-[#292825]">Abrir</a>
-              <button type="button" title={`Remover ${doc.nomeOriginal}`} aria-label={`Remover ${doc.nomeOriginal}`} disabled={removendoDocumento !== null} onClick={() => void removerDocumento(doc)} className="grid size-8 shrink-0 place-items-center rounded-md text-[#b42318] hover:bg-[#fff0ef] disabled:opacity-40">{removendoDocumento === doc.id ? <Icone nome="progress_activity" tamanho={16} className="animate-spin" /> : <Icone nome="delete" tamanho={16} />}</button>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); abrirDocumento(doc.id).catch((err) => alert(err.message)); }}
+                className="inline-flex h-8 shrink-0 items-center rounded-lg bg-[#f2f0ec] px-3 text-[11px] font-medium text-texto hover:bg-trilho dark:bg-[#292825]"
+              >
+                Abrir
+              </button>              <button type="button" title={`Remover ${doc.nomeOriginal}`} aria-label={`Remover ${doc.nomeOriginal}`} disabled={removendoDocumento !== null} onClick={() => void removerDocumento(doc)} className="grid size-8 shrink-0 place-items-center rounded-md text-[#b42318] hover:bg-[#fff0ef] disabled:opacity-40">{removendoDocumento === doc.id ? <Icone nome="progress_activity" tamanho={16} className="animate-spin" /> : <Icone nome="delete" tamanho={16} />}</button>
             </div>)}
           </div>
         </section>
